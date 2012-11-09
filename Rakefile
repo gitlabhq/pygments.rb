@@ -1,3 +1,6 @@
+#!/usr/bin/env rake
+require "bundler/gem_tasks"
+
 task :default => :test
 
 # ==========================================================
@@ -11,16 +14,6 @@ Rake::GemPackageTask.new(GEMSPEC) do |pkg|
 end
 
 # ==========================================================
-# Ruby Extension
-# ==========================================================
-
-require 'rake/extensiontask'
-Rake::ExtensionTask.new('pygments_ext', GEMSPEC) do |ext|
-  ext.ext_dir = 'ext'
-end
-task :build => :compile
-
-# ==========================================================
 # Testing
 # ==========================================================
 
@@ -29,7 +22,24 @@ Rake::TestTask.new 'test' do |t|
   t.test_files = FileList['test/test_*.rb']
   t.ruby_opts = ['-rubygems']
 end
-task :test => :build
+
+# ==========================================================
+# Benchmarking
+# ==========================================================
+
+task :bench do
+  sh "ruby bench.rb"
+end
+
+# ==========================================================
+# Cache lexers
+# # ==========================================================
+
+# Write all the lexers to a file for easy lookup
+task :lexers do
+  sh "ruby cache-lexers.rb"
+end
+
 
 # ==========================================================
 # Vendor
@@ -55,5 +65,14 @@ namespace :vendor do
     FileUtils.cd(LEXERS_DIR) { sh "python _mapping.py" }
   end
 
-  task :update => [:clobber, 'vendor/pygments-main', :load_lexers]
+  # Load all the custom formatters in the `vendor/custom_formatters` folder
+  # and stick them in our custom Pygments vendor
+  task :load_formatters do
+    FORMATTERS_DIR = 'vendor/pygments-main/pygments/formatters'
+    formatters = FileList['vendor/custom_formatters/*.py']
+    formatters.each { |f| FileUtils.copy f, FORMATTERS_DIR }
+    FileUtils.cd(FORMATTERS_DIR) { sh "python _mapping.py" }
+  end
+
+  task :update => [:clobber, 'vendor/pygments-main', :load_lexers, :load_formatters]
 end
