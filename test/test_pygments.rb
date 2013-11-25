@@ -17,10 +17,22 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_equal '<div class', code[0..9]
   end
 
+  def test_full_html_highlight
+    code = P.highlight(RUBY_CODE)
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_equal "<div class=\"highlight\"><pre><span class=\"c1\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>", code
+  end
+
+  def test_full_table_highlight
+    code = P.highlight(RUBY_CODE, :options => {:linenos => true})
+    assert_match '<span class="c1">#!/usr/bin/ruby</span>', code
+    assert_equal "<table class=\"highlighttable\"><tr><td class=\"linenos\"><div class=\"linenodiv\"><pre>1\n2</pre></div></td><td class=\"code\"><div class=\"highlight\"><pre><span class=\"c1\">#!/usr/bin/ruby</span>\n<span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span>\n</pre></div>\n</td></tr></table>", code
+  end
+
   def test_highlight_works_with_larger_files
     code = P.highlight(REDIS_CODE)
     assert_match 'used_memory_peak_human', code
-    assert_equal 454107, code.bytesize.to_i
+    assert_equal 455203, code.bytesize.to_i
   end
 
   def test_returns_nil_on_timeout
@@ -210,7 +222,6 @@ class PygmentsLexerClassTest < Test::Unit::TestCase
     assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.1')
     assert_equal P::Lexer['Groff'], P::Lexer.find_by_extname('.3')
     assert_equal P::Lexer['C'], P::Lexer.find_by_extname('.c')
-    assert_equal P::Lexer['C'], P::Lexer.find_by_extname('.h')
     assert_equal P::Lexer['Python'], P::Lexer.find_by_extname('.py')
     assert_equal P::Lexer['Java'], P::Lexer.find_by_extname('.java')
   end

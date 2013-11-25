@@ -9,9 +9,7 @@ task :default => :test
 
 GEMSPEC = eval(File.read('pygments.rb.gemspec'))
 
-require 'rake/gempackagetask'
-Rake::GemPackageTask.new(GEMSPEC) do |pkg|
-end
+require 'rubygems/package_task' 
 
 # ==========================================================
 # Testing
@@ -33,13 +31,12 @@ end
 
 # ==========================================================
 # Cache lexers
-# # ==========================================================
+# ==========================================================
 
 # Write all the lexers to a file for easy lookup
 task :lexers do
   sh "ruby cache-lexers.rb"
 end
-
 
 # ==========================================================
 # Vendor

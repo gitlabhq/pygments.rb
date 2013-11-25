@@ -20,12 +20,13 @@ module Pygments
     # Python process that talks to the Pygments library. We'll talk back and
     # forth across this pipe.
     def start(pygments_path = File.expand_path('../../../vendor/pygments-main/', __FILE__))
+      is_windows = RUBY_PLATFORM =~ /mswin|mingw/
       begin
-        @log = Logger.new(ENV['MENTOS_LOG'] ||= '/dev/null')
+        @log = Logger.new(ENV['MENTOS_LOG'] ||= is_windows ? 'NUL:' : '/dev/null')
         @log.level = Logger::INFO
         @log.datetime_format = "%Y-%m-%d %H:%M "
       rescue
-        @log = Logger.new('/dev/null')
+        @log = Logger.new(is_windows ? 'NUL:' : '/dev/null')
       end
 
       ENV['PYGMENTS_PATH'] = pygments_path
@@ -35,8 +36,19 @@ module Pygments
 
       # A pipe to the mentos python process. #popen4 gives us
       # the pid and three IO objects to write and read.
-      @pid, @in, @out, @err = popen4(File.expand_path('../mentos.py', __FILE__))
+      script = "#{python_binary} #{File.expand_path('../mentos.py', __FILE__)}"
+      @pid, @in, @out, @err = popen4(script)
       @log.info "[#{Time.now.iso8601}] Starting pid #{@pid.to_s} with fd #{@out.to_i.to_s}."
+    end
+
+    # Detect a suitable Python binary to use. We can't just use `python2`
+    # because apparently some old versions of Debian only have `python` or
+    # something like that.
+    def python_binary
+      @python_binary ||= begin
+        `which python2`
+        $?.success? ? "python2" : "python"
+      end
     end
 
     # Stop the child process by issuing a kill -9.
@@ -126,6 +138,10 @@ module Pygments
           :filenames => lxr[2],
           :mimetypes => lxr[3]
         }
+        hash["Augeas"] = {:name=>"Augeas", :aliases=>["augeas"], :filenames=>["*.aug"], :mimetypes=>[]}
+        hash["dasm16"] = {:name=>"dasm16", :aliases=>["DASM16"], :filenames=>["*.dasm16", "*.dasm"], :mimetypes=>['text/x-dasm16']}
+        hash["Puppet"] = {:name=>"Puppet", :aliases=>["puppet"], :filenames=>["*.pp"], :mimetypes=>[]}
+        hash["Slash"]  = {:name=>"Slash",  :aliases=>["slash"],  :filenames=>["*.sl"], :mimetypes=>[]}
         hash
       end
     end
@@ -358,7 +374,8 @@ module Pygments
       unless method == :lexer_name_for || method == :highlight || method == :css
         res = Yajl.load(res, :symbolize_keys => true)
       end
-      res = res[0..-2]
+      res = res.rstrip if res.class == String
+      res
     end
 
     # Convert a text header into JSON for easy access.
