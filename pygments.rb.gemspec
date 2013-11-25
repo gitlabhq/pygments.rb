@@ -1,13 +1,13 @@
 require File.expand_path('../lib/pygments/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name = 'pygments.rb'
+  s.name = 'gitlab-pygments.rb'
   s.version = Pygments::VERSION
 
   s.summary = 'pygments wrapper for ruby'
   s.description = 'pygments.rb exposes the pygments syntax highlighter to Ruby'
 
-  s.homepage = 'http://github.com/tmm1/pygments.rb'
+  s.homepage = 'http://github.com/gitlabhq/pygments.rb'
   s.has_rdoc = false
 
   s.authors = ['Aman Gupta', 'Ted Nyman']
