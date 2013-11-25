@@ -9,6 +9,8 @@ Gem::Specification.new do |s|
 
   s.homepage = 'http://github.com/gitlabhq/pygments.rb'
   s.has_rdoc = false
+  s.license  = 'MIT'
+
 
   s.authors = ['Aman Gupta', 'Ted Nyman']
   s.email = ['aman@tmm1.net']
