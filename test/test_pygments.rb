@@ -82,6 +82,12 @@ class PygmentsHighlightTest < Test::Unit::TestCase
     assert_match '39;49;00m', code
   end
 
+  def test_highlight_formatter_gitlab
+    code = P.highlight(RUBY_CODE, :formatter => 'gitlab')
+    code_html = "<table class=\"lines\"><tr><td><pre class=\"line_numbers\"><a id=\"L1\" href=\"#L1\" rel=\"#L1\"><i class=\"icon-link\"></i> 1</a>\n<a id=\"L2\" href=\"#L2\" rel=\"#L2\"><i class=\"icon-link\"></i> 2</a></pre></td><td><div class=\"highlight\"><pre><div id=\"LC1\" class=\"line\"><span class=\"c1\">#!/usr/bin/ruby</span></div><div id=\"LC2\" class=\"line\"><span class=\"nb\">puts</span> <span class=\"s1\">&#39;foo&#39;</span></div></pre></div></td></tr></table>"
+    assert_match code_html, code
+  end
+
   def test_highlight_options
     code = P.highlight(RUBY_CODE, :options => {:full => true, :title => 'test'})
     assert_match '<title>test</title>', code
